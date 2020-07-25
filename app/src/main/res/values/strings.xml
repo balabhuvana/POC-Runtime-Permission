@@ -7,4 +7,7 @@
     <string name="read_storage">Read Storage</string>
     <string name="write_storage">Write Storage</string>
     <string name="launch_camera">Launch Camera</string>
+    <string name="camera_ui_require_string"> This app is need to take picture so it need camera permission</string>
+    <string name="storage_ui_require_string"> This app is need to store the data so it need storage permission</string>
+    <string name="action">Action</string>
 </resources>

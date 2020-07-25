@@ -1,6 +1,7 @@
 package com.arunv.poc_runtime_permission
 
 
+import android.Manifest
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -34,7 +35,7 @@ class MyActivityResultFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         btnLaunchCamera.setOnClickListener {
-            activityRequestPermission!!.launch(android.Manifest.permission.CAMERA)
+            activityRequestPermission!!.launch(Manifest.permission.CAMERA)
         }
 
     }

@@ -3,6 +3,7 @@ package com.arunv.poc_runtime_permission
 
 import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -12,6 +13,7 @@ import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_fragment_with_runtime_permission.*
 
 
@@ -40,15 +42,29 @@ class FragmentWithRuntimePermission : Fragment() {
 
         activityCameraRequestPermission =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) {
-                Log.i("-----> ", "$it")
                 if (it) {
+                    printLogEntry("activityCameraRequestPermission ", "Permission Granted")
                     openCamera()
+                } else {
+                    Snackbar.make(
+                        this.requireView(),
+                        R.string.camera_ui_require_string,
+                        Snackbar.LENGTH_LONG
+                    ).show()
                 }
             }
 
         activityRequestStoragePermission =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) {
-                Log.i("-----> ", "$it")
+                if (it) {
+                    printLogEntry("activityRequestStoragePermission ", "Permission Granted")
+                } else {
+                    Snackbar.make(
+                        this.requireView(),
+                        R.string.storage_ui_require_string,
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                }
             }
     }
 
@@ -56,11 +72,11 @@ class FragmentWithRuntimePermission : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         btnOpenCamera.setOnClickListener {
-            activityCameraRequestPermission.launch(Manifest.permission.CAMERA)
+            handleCameraPermission()
         }
 
         btnReadStorage.setOnClickListener {
-            activityRequestStoragePermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+            handleStoragePermission()
         }
     }
 
@@ -69,4 +85,52 @@ class FragmentWithRuntimePermission : Fragment() {
         startActivity(cameraIntent)
     }
 
+    private fun printLogEntry(methodName: String, message: String) {
+        Log.i("-----> ", "Method name: $methodName - Message - $message")
+    }
+
+    private fun handleCameraPermission() {
+        when {
+            requireActivity().checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED -> {
+                printLogEntry("handleCameraPermission ", "All ready granted")
+                openCamera()
+            }
+            requireActivity().shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) -> {
+
+                printLogEntry("setOnClickListener", "Show UI to user")
+
+                Snackbar.make(
+                    this.requireView(),
+                    R.string.camera_ui_require_string,
+                    Snackbar.LENGTH_LONG
+                ).setAction(R.string.action) {
+                    activityCameraRequestPermission.launch(Manifest.permission.CAMERA)
+                }.show()
+            }
+            else -> {
+                activityCameraRequestPermission.launch(Manifest.permission.CAMERA)
+            }
+        }
+    }
+
+    private fun handleStoragePermission() {
+        when {
+            requireActivity().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
+                printLogEntry("handleStoragePermission ", "All ready granted")
+            }
+            requireActivity().shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE) -> {
+
+                Snackbar.make(
+                    this.requireView(),
+                    R.string.storage_ui_require_string,
+                    Snackbar.LENGTH_LONG
+                ).setAction(R.string.action) {
+                    activityRequestStoragePermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+                }.show()
+            }
+            else -> {
+                activityRequestStoragePermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+        }
+    }
 }
