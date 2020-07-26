@@ -24,6 +24,7 @@ class FragmentWithRuntimePermission : Fragment() {
 
     private lateinit var activityCameraRequestPermission: ActivityResultLauncher<String>
     private lateinit var activityRequestStoragePermission: ActivityResultLauncher<String>
+    private lateinit var activityMultipleRequestPermission: ActivityResultLauncher<Array<String>>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -66,6 +67,25 @@ class FragmentWithRuntimePermission : Fragment() {
                     ).show()
                 }
             }
+
+        activityMultipleRequestPermission =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+                if (it.size >= 0) {
+                    if (it.containsKey(Manifest.permission.CAMERA)) {
+                        if (it.getValue(Manifest.permission.CAMERA)) {
+                            printLogEntry("-----> ", "Camera Permission Granted")
+                        } else {
+                            printLogEntry("-----> ", "Camera Permission Not Granted")
+                        }
+                    } else if (it.containsKey(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                        if (it.getValue(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                            printLogEntry("-----> ", "READ_EXTERNAL_STORAGE Permission Granted")
+                        } else {
+                            printLogEntry("-----> ", "READ_EXTERNAL_STORAGE Permission Not Granted")
+                        }
+                    }
+                }
+            }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -77,6 +97,10 @@ class FragmentWithRuntimePermission : Fragment() {
 
         btnReadStorage.setOnClickListener {
             handleStoragePermission()
+        }
+
+        btnMultiplePermission.setOnClickListener {
+            handleMultiplePermission()
         }
     }
 
@@ -132,5 +156,12 @@ class FragmentWithRuntimePermission : Fragment() {
                 activityRequestStoragePermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
         }
+    }
+
+    private fun handleMultiplePermission() {
+        val handleMultiplePermission: Array<String> =
+            arrayOf(Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE)
+
+        activityMultipleRequestPermission.launch(handleMultiplePermission)
     }
 }
